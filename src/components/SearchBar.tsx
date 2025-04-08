@@ -2,8 +2,9 @@
 import React, { useState, FormEvent, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, X, Trash } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 
 interface SearchBarProps {
   onSearch: (city: string) => void;
@@ -40,6 +41,18 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
     localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
   };
 
+  const removeSearch = (searchTerm: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Empêcher le clic de se propager au bouton parent
+    const updatedSearches = recentSearches.filter(s => s !== searchTerm);
+    setRecentSearches(updatedSearches);
+    localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
+  };
+
+  const clearAllSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem("recentSearches");
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (city.trim()) {
@@ -72,7 +85,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
               onChange={(e) => setCity(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-              className="bg-white/80 backdrop-blur-sm pr-8 border-2 focus:border-primary/80"
+              className="bg-white/80 backdrop-blur-sm pr-8 border-2 focus:border-primary/80 text-gray-800"
             />
             <MapPin className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </motion.div>
@@ -105,16 +118,37 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
           >
             {recentSearches.length > 0 && (
               <div className="mb-2">
-                <p className="text-xs font-medium text-gray-700 mb-2 px-2">Recherches récentes</p>
+                <div className="flex justify-between items-center px-2 mb-2">
+                  <p className="text-xs font-medium text-gray-700">Recherches récentes</p>
+                  {recentSearches.length > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={clearAllSearches}
+                      className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+                    >
+                      <Trash className="h-3 w-3 mr-1" />
+                      Tout effacer
+                    </Button>
+                  )}
+                </div>
                 {recentSearches.map((search, index) => (
                   <motion.button
                     key={`recent-${index}`}
                     whileHover={{ backgroundColor: "#f3f4f6" }}
-                    className="flex items-center gap-2 w-full text-left px-3 py-1.5 rounded-md text-sm text-gray-800"
+                    className="flex items-center justify-between w-full text-left px-3 py-1.5 rounded-md text-sm text-gray-800"
                     onClick={() => handleCityClick(search)}
                   >
-                    <Search className="h-3 w-3 text-gray-500" />
-                    {search}
+                    <div className="flex items-center gap-2">
+                      <Search className="h-3 w-3 text-gray-500" />
+                      {search}
+                    </div>
+                    <button
+                      onClick={(e) => removeSearch(search, e)}
+                      className="p-1 hover:bg-gray-200 rounded-full text-gray-500 hover:text-gray-800"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </motion.button>
                 ))}
               </div>
