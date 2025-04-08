@@ -105,15 +105,15 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
           >
             {recentSearches.length > 0 && (
               <div className="mb-2">
-                <p className="text-xs font-medium text-muted-foreground mb-2 px-2">Recherches récentes</p>
+                <p className="text-xs font-medium text-gray-700 mb-2 px-2">Recherches récentes</p>
                 {recentSearches.map((search, index) => (
                   <motion.button
                     key={`recent-${index}`}
                     whileHover={{ backgroundColor: "#f3f4f6" }}
-                    className="flex items-center gap-2 w-full text-left px-3 py-1.5 rounded-md text-sm"
+                    className="flex items-center gap-2 w-full text-left px-3 py-1.5 rounded-md text-sm text-gray-800"
                     onClick={() => handleCityClick(search)}
                   >
-                    <Search className="h-3 w-3 text-muted-foreground" />
+                    <Search className="h-3 w-3 text-gray-500" />
                     {search}
                   </motion.button>
                 ))}
@@ -122,14 +122,14 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
 
             {POPULAR_CITIES.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2 px-2">Villes populaires</p>
+                <p className="text-xs font-medium text-gray-700 mb-2 px-2">Villes populaires</p>
                 <div className="flex flex-wrap gap-1">
                   {POPULAR_CITIES.map((popularCity, index) => (
                     <motion.button
                       key={`popular-${index}`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="bg-blue-50 hover:bg-blue-100 text-xs px-2 py-1 rounded-full"
+                      className="bg-blue-50 hover:bg-blue-100 text-xs px-2 py-1 rounded-full text-blue-700"
                       onClick={() => handleCityClick(popularCity)}
                     >
                       {popularCity}
