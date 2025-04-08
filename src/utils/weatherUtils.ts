@@ -10,19 +10,39 @@ export interface WeatherData {
   icon: string;
   dt: number;
   timezone: number;
+  sunrise: number;
+  sunset: number;
+  pressure: number;
+  visibility: number;
+  clouds: number;
+  uv_index?: number;
 }
 
 export const fetchWeatherData = async (city: string, apiKey: string): Promise<WeatherData> => {
   try {
-    const response = await fetch(
+    const weatherResponse = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
     );
     
-    if (!response.ok) {
+    if (!weatherResponse.ok) {
       throw new Error('City not found');
     }
     
-    const data = await response.json();
+    const data = await weatherResponse.json();
+
+    // Fetch additional UV index data if available
+    let uvIndex = undefined;
+    try {
+      const uvResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/uvi?lat=${data.coord.lat}&lon=${data.coord.lon}&appid=${apiKey}`
+      );
+      if (uvResponse.ok) {
+        const uvData = await uvResponse.json();
+        uvIndex = uvData.value;
+      }
+    } catch (error) {
+      console.log("UV index not available");
+    }
     
     return {
       name: data.name,
@@ -35,6 +55,12 @@ export const fetchWeatherData = async (city: string, apiKey: string): Promise<We
       icon: data.weather[0].icon,
       dt: data.dt,
       timezone: data.timezone,
+      sunrise: data.sys.sunrise,
+      sunset: data.sys.sunset,
+      pressure: data.main.pressure,
+      visibility: data.visibility,
+      clouds: data.clouds.all,
+      uv_index: uvIndex,
     };
   } catch (error) {
     throw new Error('Failed to fetch weather data');
@@ -78,4 +104,43 @@ export const getBackgroundClass = (timeOfDay: 'morning' | 'day' | 'evening' | 'n
 
 export const formatTime = (date: Date): string => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+export const formatSunTime = (timestamp: number, timezone: number): string => {
+  const date = new Date((timestamp + timezone) * 1000);
+  return formatTime(date);
+};
+
+export const getUVIndexDescription = (index?: number): { text: string; color: string } => {
+  if (index === undefined) return { text: "Non disponible", color: "text-gray-500" };
+  
+  if (index <= 2) {
+    return { text: "Faible", color: "text-green-500" };
+  } else if (index <= 5) {
+    return { text: "Modéré", color: "text-yellow-500" };
+  } else if (index <= 7) {
+    return { text: "Élevé", color: "text-orange-500" };
+  } else if (index <= 10) {
+    return { text: "Très élevé", color: "text-red-500" };
+  } else {
+    return { text: "Extrême", color: "text-purple-500" };
+  }
+};
+
+export const getWindDirection = (degree: number): string => {
+  const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+  return directions[Math.round(degree / 45) % 8];
+};
+
+export const getVisibilityText = (meters: number): string => {
+  const km = meters / 1000;
+  if (km < 1) {
+    return `${meters}m (Mauvaise)`;
+  } else if (km < 5) {
+    return `${km.toFixed(1)}km (Modérée)`;
+  } else if (km < 10) {
+    return `${km.toFixed(1)}km (Bonne)`;
+  } else {
+    return `${km.toFixed(1)}km (Excellente)`;
+  }
 };
