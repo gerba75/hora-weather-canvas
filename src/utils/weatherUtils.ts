@@ -1,4 +1,3 @@
-
 export interface WeatherData {
   name: string;
   country: string;
@@ -68,18 +67,29 @@ export const fetchWeatherData = async (city: string, apiKey: string): Promise<We
 };
 
 export const getLocalTime = (dt: number, timezone: number): Date => {
-  // OpenWeatherMap returns dt as UTC timestamp in seconds
-  // timezone is the offset in seconds from UTC
+  // OpenWeatherMap's dt is UTC timestamp in seconds
+  // The timezone is the shift in seconds from UTC
   
-  // Create a UTC date object from the timestamp
-  const utcTime = new Date(dt * 1000);
+  // Create a Date object from the UTC time
+  const utcDate = new Date(dt * 1000);
   
-  // Calculate local time by converting UTC to the target timezone
-  // First get UTC time in milliseconds, then apply the timezone offset
-  const localMillis = utcTime.getTime() + (timezone * 1000);
-  const localTime = new Date(localMillis);
+  // Get current date to calculate correct local time
+  const now = new Date();
+  const localDate = new Date();
   
-  return localTime;
+  // Set hours based on UTC time + timezone offset (in hours)
+  const utcHours = utcDate.getUTCHours();
+  const utcMinutes = utcDate.getUTCMinutes();
+  const utcSeconds = utcDate.getUTCSeconds();
+  
+  // Apply the timezone offset (convert from seconds to hours)
+  const timezoneHours = timezone / 3600;
+  
+  localDate.setUTCHours(utcHours + timezoneHours);
+  localDate.setUTCMinutes(utcMinutes);
+  localDate.setUTCSeconds(utcSeconds);
+  
+  return localDate;
 };
 
 export const getTimeOfDay = (date: Date): 'morning' | 'day' | 'evening' | 'night' => {
@@ -116,11 +126,22 @@ export const formatTime = (date: Date): string => {
 };
 
 export const formatSunTime = (timestamp: number, timezone: number): string => {
-  // For sunrise/sunset times (also UTC timestamps)
-  const utcTime = new Date(timestamp * 1000);
-  const localMillis = utcTime.getTime() + (timezone * 1000);
-  const localSunTime = new Date(localMillis);
-  return formatTime(localSunTime);
+  // Create a Date object from the UTC timestamp
+  const utcDate = new Date(timestamp * 1000);
+  
+  // Calculate hours with timezone offset
+  const utcHours = utcDate.getUTCHours();
+  const utcMinutes = utcDate.getUTCMinutes();
+  
+  // Apply the timezone offset (convert from seconds to hours)
+  const timezoneHours = timezone / 3600;
+  
+  const localDate = new Date();
+  localDate.setUTCHours(utcHours + timezoneHours);
+  localDate.setUTCMinutes(utcMinutes);
+  localDate.setUTCSeconds(0);
+  
+  return formatTime(localDate);
 };
 
 export const getUVIndexDescription = (index?: number): { text: string; color: string } => {
