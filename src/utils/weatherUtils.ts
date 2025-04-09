@@ -1,3 +1,4 @@
+
 export interface WeatherData {
   name: string;
   country: string;
@@ -67,9 +68,17 @@ export const fetchWeatherData = async (city: string, apiKey: string): Promise<We
 };
 
 export const getLocalTime = (dt: number, timezone: number): Date => {
-  // Create date object from timestamp and apply timezone offset
-  // dt is the UTC time in seconds since epoch
-  const localTime = new Date((dt * 1000) + (timezone * 1000));
+  // OpenWeatherMap returns dt as UTC timestamp in seconds
+  // timezone is the offset in seconds from UTC
+  
+  // Create a UTC date object from the timestamp
+  const utcTime = new Date(dt * 1000);
+  
+  // Calculate local time by converting UTC to the target timezone
+  // First get UTC time in milliseconds, then apply the timezone offset
+  const localMillis = utcTime.getTime() + (timezone * 1000);
+  const localTime = new Date(localMillis);
+  
   return localTime;
 };
 
@@ -107,8 +116,10 @@ export const formatTime = (date: Date): string => {
 };
 
 export const formatSunTime = (timestamp: number, timezone: number): string => {
-  // For sunrise/sunset times (which are provided as UTC timestamps)
-  const localSunTime = new Date((timestamp * 1000) + (timezone * 1000));
+  // For sunrise/sunset times (also UTC timestamps)
+  const utcTime = new Date(timestamp * 1000);
+  const localMillis = utcTime.getTime() + (timezone * 1000);
+  const localSunTime = new Date(localMillis);
   return formatTime(localSunTime);
 };
 
