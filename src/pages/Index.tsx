@@ -1,14 +1,17 @@
 
 import React, { useState, useEffect } from "react";
-import { toast } from "@/components/ui/use-toast";
-import { WeatherData, fetchWeatherData, getLocalTime, getTimeOfDay, getBackgroundClass } from "@/utils/weatherUtils";
+import { toast } from "@/hooks/use-toast";
+import { WeatherData, fetchWeatherData, getLocalTime, getTimeOfDay, getBackgroundClass, fetchForecastData, ForecastData } from "@/utils/weatherUtils";
 import SearchBar from "@/components/SearchBar";
 import WeatherCard from "@/components/WeatherCard";
+import ForecastList from "@/components/ForecastList";
+import WeatherAlerts from "@/components/WeatherAlerts";
 import { motion } from "framer-motion";
 import { Cloud, CloudSun, CloudRain, Wind } from "lucide-react";
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [forecastData, setForecastData] = useState<ForecastData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'day' | 'evening' | 'night'>('day');
   
@@ -25,8 +28,23 @@ const Index = () => {
   const handleSearch = async (city: string) => {
     try {
       setIsLoading(true);
+      
+      // Fetch current weather data
       const data = await fetchWeatherData(city, API_KEY);
       setWeatherData(data);
+      
+      // Fetch forecast data
+      try {
+        const forecast = await fetchForecastData(city, API_KEY);
+        setForecastData(forecast);
+      } catch (error) {
+        console.error("Forecast error:", error);
+        toast({
+          title: "Information",
+          description: "Les prévisions sur plusieurs jours n'ont pas pu être chargées.",
+          variant: "default",
+        });
+      }
       
       const localTime = getLocalTime(data.dt, data.timezone);
       const currentTimeOfDay = getTimeOfDay(localTime);
@@ -188,7 +206,17 @@ const Index = () => {
                 <p className="mt-4 text-lg">Chargement des données météo...</p>
               </motion.div>
             ) : weatherData ? (
-              <WeatherCard data={weatherData} />
+              <div className="w-full max-w-5xl">
+                <WeatherCard data={weatherData} />
+                
+                {weatherData.alerts && weatherData.alerts.length > 0 && (
+                  <WeatherAlerts alerts={weatherData.alerts} timezone={weatherData.timezone} />
+                )}
+                
+                {forecastData.length > 0 && (
+                  <ForecastList forecastData={forecastData} timezone={weatherData.timezone} />
+                )}
+              </div>
             ) : (
               <motion.div 
                 className="text-center p-8 bg-white/80 backdrop-blur-md rounded-xl shadow-lg max-w-md w-full"
