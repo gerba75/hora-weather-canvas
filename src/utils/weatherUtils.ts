@@ -68,13 +68,18 @@ export const fetchWeatherData = async (city: string, apiKey: string): Promise<We
 };
 
 export const getLocalTime = (dt: number, timezone: number): Date => {
-  const utcTime = new Date(dt * 1000);
-  const localTime = new Date(utcTime.getTime() + timezone * 1000);
-  return localTime;
+  // Create date object from UTC timestamp
+  const utcSeconds = dt * 1000;
+  const utcDate = new Date(utcSeconds);
+  
+  // Calculate the local time by adding the timezone offset (in seconds)
+  const localDate = new Date(utcDate.getTime() + (timezone * 1000));
+  
+  return localDate;
 };
 
 export const getTimeOfDay = (date: Date): 'morning' | 'day' | 'evening' | 'night' => {
-  const hours = date.getUTCHours();
+  const hours = date.getHours();
   
   if (hours >= 5 && hours < 10) {
     return 'morning';
@@ -107,8 +112,10 @@ export const formatTime = (date: Date): string => {
 };
 
 export const formatSunTime = (timestamp: number, timezone: number): string => {
-  const date = new Date((timestamp + timezone) * 1000);
-  return formatTime(date);
+  // Create date object from UTC timestamp and add the timezone offset
+  const utcDate = new Date(timestamp * 1000);
+  const localDate = new Date(utcDate.getTime() + (timezone * 1000));
+  return formatTime(localDate);
 };
 
 export const getUVIndexDescription = (index?: number): { text: string; color: string } => {
