@@ -1,4 +1,3 @@
-
 export interface WeatherData {
   name: string;
   country: string;
@@ -68,14 +67,10 @@ export const fetchWeatherData = async (city: string, apiKey: string): Promise<We
 };
 
 export const getLocalTime = (dt: number, timezone: number): Date => {
-  // Create date object from UTC timestamp
-  const utcSeconds = dt * 1000;
-  const utcDate = new Date(utcSeconds);
-  
-  // Calculate the local time by adding the timezone offset (in seconds)
-  const localDate = new Date(utcDate.getTime() + (timezone * 1000));
-  
-  return localDate;
+  // Create date object from timestamp and apply timezone offset
+  // dt is the UTC time in seconds since epoch
+  const localTime = new Date((dt * 1000) + (timezone * 1000));
+  return localTime;
 };
 
 export const getTimeOfDay = (date: Date): 'morning' | 'day' | 'evening' | 'night' => {
@@ -112,10 +107,9 @@ export const formatTime = (date: Date): string => {
 };
 
 export const formatSunTime = (timestamp: number, timezone: number): string => {
-  // Create date object from UTC timestamp and add the timezone offset
-  const utcDate = new Date(timestamp * 1000);
-  const localDate = new Date(utcDate.getTime() + (timezone * 1000));
-  return formatTime(localDate);
+  // For sunrise/sunset times (which are provided as UTC timestamps)
+  const localSunTime = new Date((timestamp * 1000) + (timezone * 1000));
+  return formatTime(localSunTime);
 };
 
 export const getUVIndexDescription = (index?: number): { text: string; color: string } => {
