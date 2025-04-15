@@ -1,4 +1,3 @@
-
 export interface WeatherData {
   name: string;
   country: string;
@@ -171,14 +170,16 @@ export const fetchForecastData = async (city: string, apiKey: string): Promise<F
 };
 
 export const getLocalTime = (dt: number, timezone: number): Date => {
-  // Créer une nouvelle date à partir de l'horodatage UTC (en millisecondes)
-  const utcTimestamp = dt * 1000;
+  // Create a date object for the current UTC time (OpenWeatherMap dt is in UTC)
+  const localTime = new Date(dt * 1000);
   
-  // Obtenir l'heure locale en tenant compte du décalage horaire
-  const localTimestamp = utcTimestamp + (timezone * 1000);
+  // Get the local timezone offset in milliseconds
+  const localOffset = localTime.getTimezoneOffset() * 60000;
   
-  // Créer une date à partir du timestamp local
-  return new Date(localTimestamp);
+  // Calculate the correct time by applying the location's timezone
+  const targetTime = new Date(localTime.getTime() + localOffset + (timezone * 1000));
+  
+  return targetTime;
 };
 
 export const getTimeOfDay = (date: Date): 'morning' | 'day' | 'evening' | 'night' => {
@@ -215,13 +216,13 @@ export const formatTime = (date: Date): string => {
 };
 
 export const formatSunTime = (timestamp: number, timezone: number): string => {
-  // Créer une date à partir de l'horodatage UTC
+  // Create a date object for the current UTC time
   const utcTimestamp = timestamp * 1000;
   
-  // Calculer l'heure locale en tenant compte du décalage horaire
+  // Calculate the correct time by applying the location's timezone
   const localTimestamp = utcTimestamp + (timezone * 1000);
   
-  // Créer une date à partir du timestamp local
+  // Create a date object for the local time
   const localDate = new Date(localTimestamp);
   
   return formatTime(localDate);

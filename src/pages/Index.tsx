@@ -13,6 +13,7 @@ import {
 import SearchBar from "@/components/SearchBar";
 import WeatherCard from "@/components/WeatherCard";
 import ForecastCard from "@/components/ForecastCard";
+import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Cloud, CloudSun, CloudRain, Wind } from "lucide-react";
 
@@ -222,6 +223,8 @@ const Index = () => {
             )}
           </motion.div>
         </motion.div>
+        
+        <Footer />
       </div>
     </div>
   );
