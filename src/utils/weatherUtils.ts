@@ -1,3 +1,4 @@
+
 export interface WeatherData {
   name: string;
   country: string;
@@ -15,6 +16,21 @@ export interface WeatherData {
   visibility: number;
   clouds: number;
   uv_index?: number;
+}
+
+export interface ForecastDay {
+  dt: number;
+  temp: {
+    day: number;
+    min: number;
+    max: number;
+  };
+  humidity: number;
+  weather: {
+    description: string;
+    icon: string;
+  }[];
+  pop: number; // probabilité de précipitation
 }
 
 export const fetchWeatherData = async (city: string, apiKey: string): Promise<WeatherData> => {
@@ -66,30 +82,103 @@ export const fetchWeatherData = async (city: string, apiKey: string): Promise<We
   }
 };
 
+export const fetchForecastData = async (city: string, apiKey: string): Promise<ForecastDay[]> => {
+  try {
+    // D'abord obtenir les coordonnées de la ville
+    const geoResponse = await fetch(
+      `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`
+    );
+    
+    if (!geoResponse.ok) {
+      throw new Error('City not found');
+    }
+    
+    const geoData = await geoResponse.json();
+    
+    if (!geoData.length) {
+      throw new Error('City coordinates not found');
+    }
+    
+    const { lat, lon } = geoData[0];
+    
+    // Ensuite récupérer les prévisions sur 5 jours
+    const forecastResponse = await fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`
+    );
+    
+    if (!forecastResponse.ok) {
+      throw new Error('Forecast data not available');
+    }
+    
+    const forecastData = await forecastResponse.json();
+    
+    // Traiter les données pour obtenir une prévision par jour
+    // L'API renvoie des prévisions toutes les 3 heures, nous devons les regrouper par jour
+    const dailyForecasts: ForecastDay[] = [];
+    const forecastsByDay: Record<string, any[]> = {};
+    
+    forecastData.list.forEach((forecast: any) => {
+      const date = new Date(forecast.dt * 1000);
+      const dayKey = date.toISOString().split('T')[0];
+      
+      if (!forecastsByDay[dayKey]) {
+        forecastsByDay[dayKey] = [];
+      }
+      
+      forecastsByDay[dayKey].push(forecast);
+    });
+    
+    // Limiter à 5 jours et calculer les valeurs pour chaque jour
+    Object.keys(forecastsByDay).slice(0, 5).forEach(dayKey => {
+      const dayForecasts = forecastsByDay[dayKey];
+      
+      // Trouver la prévision pour le milieu de la journée (vers 12h-15h)
+      const middayForecast = dayForecasts.find((f: any) => {
+        const hour = new Date(f.dt * 1000).getUTCHours();
+        return hour >= 12 && hour <= 15;
+      }) || dayForecasts[0];
+      
+      // Calculer min et max pour la journée
+      let minTemp = Number.MAX_VALUE;
+      let maxTemp = Number.MIN_VALUE;
+      
+      dayForecasts.forEach((f: any) => {
+        minTemp = Math.min(minTemp, f.main.temp);
+        maxTemp = Math.max(maxTemp, f.main.temp);
+      });
+      
+      dailyForecasts.push({
+        dt: middayForecast.dt,
+        temp: {
+          day: Math.round(middayForecast.main.temp),
+          min: Math.round(minTemp),
+          max: Math.round(maxTemp)
+        },
+        humidity: middayForecast.main.humidity,
+        weather: [{
+          description: middayForecast.weather[0].description,
+          icon: middayForecast.weather[0].icon
+        }],
+        pop: Math.round(middayForecast.pop * 100) // Convertir en pourcentage
+      });
+    });
+    
+    return dailyForecasts;
+  } catch (error) {
+    console.error("Forecast fetch error:", error);
+    throw new Error('Failed to fetch forecast data');
+  }
+};
+
 export const getLocalTime = (dt: number, timezone: number): Date => {
-  // OpenWeatherMap's dt is UTC timestamp in seconds
-  // The timezone is the shift in seconds from UTC
+  // Créer une nouvelle date à partir de l'horodatage UTC (en millisecondes)
+  const utcTimestamp = dt * 1000;
   
-  // Create a Date object from the UTC time
-  const utcDate = new Date(dt * 1000);
+  // Obtenir l'heure locale en tenant compte du décalage horaire
+  const localTimestamp = utcTimestamp + (timezone * 1000);
   
-  // Get current date to calculate correct local time
-  const now = new Date();
-  const localDate = new Date();
-  
-  // Set hours based on UTC time + timezone offset (in hours)
-  const utcHours = utcDate.getUTCHours();
-  const utcMinutes = utcDate.getUTCMinutes();
-  const utcSeconds = utcDate.getUTCSeconds();
-  
-  // Apply the timezone offset (convert from seconds to hours)
-  const timezoneHours = timezone / 3600;
-  
-  localDate.setUTCHours(utcHours + timezoneHours);
-  localDate.setUTCMinutes(utcMinutes);
-  localDate.setUTCSeconds(utcSeconds);
-  
-  return localDate;
+  // Créer une date à partir du timestamp local
+  return new Date(localTimestamp);
 };
 
 export const getTimeOfDay = (date: Date): 'morning' | 'day' | 'evening' | 'night' => {
@@ -126,20 +215,14 @@ export const formatTime = (date: Date): string => {
 };
 
 export const formatSunTime = (timestamp: number, timezone: number): string => {
-  // Create a Date object from the UTC timestamp
-  const utcDate = new Date(timestamp * 1000);
+  // Créer une date à partir de l'horodatage UTC
+  const utcTimestamp = timestamp * 1000;
   
-  // Calculate hours with timezone offset
-  const utcHours = utcDate.getUTCHours();
-  const utcMinutes = utcDate.getUTCMinutes();
+  // Calculer l'heure locale en tenant compte du décalage horaire
+  const localTimestamp = utcTimestamp + (timezone * 1000);
   
-  // Apply the timezone offset (convert from seconds to hours)
-  const timezoneHours = timezone / 3600;
-  
-  const localDate = new Date();
-  localDate.setUTCHours(utcHours + timezoneHours);
-  localDate.setUTCMinutes(utcMinutes);
-  localDate.setUTCSeconds(0);
+  // Créer une date à partir du timestamp local
+  const localDate = new Date(localTimestamp);
   
   return formatTime(localDate);
 };
@@ -176,4 +259,14 @@ export const getVisibilityText = (meters: number): string => {
   } else {
     return `${km.toFixed(1)}km (Excellente)`;
   }
+};
+
+export const formatDay = (timestamp: number): string => {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleDateString('fr-FR', { weekday: 'long' });
+};
+
+export const formatDate = (timestamp: number): string => {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
 };

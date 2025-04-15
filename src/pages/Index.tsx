@@ -1,14 +1,24 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { WeatherData, fetchWeatherData, getLocalTime, getTimeOfDay, getBackgroundClass } from "@/utils/weatherUtils";
+import { 
+  WeatherData, 
+  ForecastDay,
+  fetchWeatherData, 
+  fetchForecastData,
+  getLocalTime, 
+  getTimeOfDay, 
+  getBackgroundClass 
+} from "@/utils/weatherUtils";
 import SearchBar from "@/components/SearchBar";
 import WeatherCard from "@/components/WeatherCard";
+import ForecastCard from "@/components/ForecastCard";
 import { motion } from "framer-motion";
 import { Cloud, CloudSun, CloudRain, Wind } from "lucide-react";
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [forecastData, setForecastData] = useState<ForecastDay[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'day' | 'evening' | 'night'>('day');
   
@@ -25,8 +35,14 @@ const Index = () => {
   const handleSearch = async (city: string) => {
     try {
       setIsLoading(true);
+      
+      // Fetch current weather
       const data = await fetchWeatherData(city, API_KEY);
       setWeatherData(data);
+      
+      // Fetch 5-day forecast
+      const forecast = await fetchForecastData(city, API_KEY);
+      setForecastData(forecast);
       
       const localTime = getLocalTime(data.dt, data.timezone);
       const currentTimeOfDay = getTimeOfDay(localTime);
@@ -177,7 +193,7 @@ const Index = () => {
             <SearchBar onSearch={handleSearch} isLoading={isLoading} />
           </motion.div>
           
-          <motion.div variants={itemVariants} className="mt-10 w-full flex justify-center">
+          <motion.div variants={itemVariants} className="mt-10 w-full flex flex-col items-center">
             {isLoading ? (
               <motion.div 
                 className="flex flex-col items-center bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-xl"
@@ -188,7 +204,10 @@ const Index = () => {
                 <p className="mt-4 text-lg">Chargement des données météo...</p>
               </motion.div>
             ) : weatherData ? (
-              <WeatherCard data={weatherData} />
+              <>
+                <WeatherCard data={weatherData} />
+                {forecastData.length > 0 && <ForecastCard forecast={forecastData} />}
+              </>
             ) : (
               <motion.div 
                 className="text-center p-8 bg-white/80 backdrop-blur-md rounded-xl shadow-lg max-w-md w-full"
