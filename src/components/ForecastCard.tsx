@@ -2,6 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ForecastDay, formatDay, formatDate } from "@/utils/weatherUtils";
+import { translateWeatherDescription } from "@/utils/translationUtils";
 import { motion } from "framer-motion";
 import { Cloud, Droplets, ArrowDown, ArrowUp } from "lucide-react";
 
@@ -67,10 +68,10 @@ const ForecastCard: React.FC<ForecastCardProps> = ({ forecast }) => {
                 <div className="flex items-center">
                   <img 
                     src={`https://openweathermap.org/img/wn/${day.weather[0].icon}.png`}
-                    alt={day.weather[0].description}
+                    alt={translateWeatherDescription(day.weather[0].description)}
                     className="h-10 w-10"
                   />
-                  <span className="text-sm capitalize">{day.weather[0].description}</span>
+                  <span className="text-sm capitalize">{translateWeatherDescription(day.weather[0].description)}</span>
                 </div>
                 
                 <div className="flex flex-col items-end">
