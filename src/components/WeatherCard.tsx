@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -130,15 +129,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data }) => {
               month: 'long', 
               day: 'numeric' 
             })}
-          </motion.p>
-          
-          <motion.p 
-            className="text-sm text-muted-foreground"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            {formatTime(localTime)}
           </motion.p>
         </CardHeader>
 
