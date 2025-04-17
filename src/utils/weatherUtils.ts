@@ -112,24 +112,36 @@ export const fetchForecastData = async (city: string, apiKey: string): Promise<F
     const forecastData = await forecastResponse.json();
     
     // Traiter les données pour obtenir une prévision par jour
-    // L'API renvoie des prévisions toutes les 3 heures, nous devons les regrouper par jour
     const dailyForecasts: ForecastDay[] = [];
     const forecastsByDay: Record<string, any[]> = {};
     
+    // Obtenir la date actuelle (aujourd'hui)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     forecastData.list.forEach((forecast: any) => {
       const date = new Date(forecast.dt * 1000);
-      const dayKey = date.toISOString().split('T')[0];
+      date.setHours(0, 0, 0, 0);
       
-      if (!forecastsByDay[dayKey]) {
-        forecastsByDay[dayKey] = [];
+      // Ne prendre que les jours futurs (à partir de demain)
+      if (date > today) {
+        const dayKey = date.toISOString().split('T')[0];
+        
+        if (!forecastsByDay[dayKey]) {
+          forecastsByDay[dayKey] = [];
+        }
+        
+        forecastsByDay[dayKey].push(forecast);
       }
-      
-      forecastsByDay[dayKey].push(forecast);
     });
     
-    // Limiter à 5 jours et calculer les valeurs pour chaque jour
-    Object.keys(forecastsByDay).slice(0, 5).forEach(dayKey => {
+    // Prendre les 5 prochains jours
+    const nextFiveDays = Object.keys(forecastsByDay).sort().slice(0, 5);
+    
+    nextFiveDays.forEach(dayKey => {
       const dayForecasts = forecastsByDay[dayKey];
+      
+      if (!dayForecasts || dayForecasts.length === 0) return;
       
       // Trouver la prévision pour le milieu de la journée (vers 12h-15h)
       const middayForecast = dayForecasts.find((f: any) => {
