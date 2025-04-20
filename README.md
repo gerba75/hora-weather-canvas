@@ -1,73 +1,57 @@
-# Welcome to your Lovable project
 
-## Project info
+# Météo en Direct 🌦️
 
-**URL**: https://lovable.dev/projects/9481821f-14fa-47fa-90c8-45dd09e268bc
+Une application web moderne et réactive pour consulter les conditions météorologiques actuelles et les prévisions à 5 jours pour n'importe quelle ville dans le monde.
 
-## How can I edit this code?
+## 🚀 Fonctionnalités
 
-There are several ways of editing your application.
+- Recherche de météo par ville
+- Prévisions météorologiques détaillées
+- Interface responsive
+- Traduction des descriptions météorologiques
+- Animations fluides avec Framer Motion
 
-**Use Lovable**
+## 🛠 Technologies Utilisées
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/9481821f-14fa-47fa-90c8-45dd09e268bc) and start prompting.
+- React
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- OpenWeatherMap API
+- shadcn/ui
+- React Query
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📦 Installation
 
-**Use your preferred IDE**
+```bash
+# Clonez le dépôt
+git clone [URL-DE-VOTRE-REPOSITORY]
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Accédez au répertoire du projet
+cd meteo-en-direct
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Installez les dépendances
+npm install
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Lancez le serveur de développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🌐 Variables d'Environnement
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Créez un fichier `.env` à la racine du projet et ajoutez :
+```
+VITE_OPENWEATHERMAP_API_KEY=votre_clé_api_ici
+```
 
-**Use GitHub Codespaces**
+## 📡 API Utilisée
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Données météorologiques fournies par [OpenWeatherMap](https://openweathermap.org/)
 
-## What technologies are used for this project?
+## 🤝 Contribution
 
-This project is built with:
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou à proposer une pull request.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📄 Licence
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/9481821f-14fa-47fa-90c8-45dd09e268bc) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Ce projet est sous licence MIT.
