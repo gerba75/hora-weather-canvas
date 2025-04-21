@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { 
@@ -18,15 +17,14 @@ import { motion } from "framer-motion";
 import { Cloud, CloudSun, CloudRain, Wind } from "lucide-react";
 
 const Index = () => {
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [forecastData, setForecastData] = useState<ForecastDay[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [timeOfDay, setTimeOfDay] = useState<'morning' | 'day' | 'evening' | 'night'>('day');
+  const [weatherData, setWeatherData] = React.useState<WeatherData | null>(null);
+  const [forecastData, setForecastData] = React.useState<ForecastDay[]>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [timeOfDay, setTimeOfDay] = React.useState<'morning' | 'day' | 'evening' | 'night'>('day');
   
-  const API_KEY = "edfa73abee8764ac3a01e3c9dd2ee078";
+  const API_KEY = import.meta.env.VITE_OPENWEATHERMAP_API_KEY as string;
 
   useEffect(() => {
-    // Try to load last searched city from localStorage
     const lastCity = localStorage.getItem("lastSearchedCity");
     if (lastCity) {
       handleSearch(lastCity);
@@ -36,22 +34,17 @@ const Index = () => {
   const handleSearch = async (city: string) => {
     try {
       setIsLoading(true);
-      
-      // Fetch current weather
       const data = await fetchWeatherData(city, API_KEY);
       setWeatherData(data);
-      
-      // Fetch 5-day forecast
+
       const forecast = await fetchForecastData(city, API_KEY);
       setForecastData(forecast);
-      
+
       const localTime = getLocalTime(data.dt, data.timezone);
       const currentTimeOfDay = getTimeOfDay(localTime);
       setTimeOfDay(currentTimeOfDay);
-      
-      // Save last searched city
+
       localStorage.setItem("lastSearchedCity", city);
-      
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -65,7 +58,6 @@ const Index = () => {
 
   const backgroundClass = getBackgroundClass(timeOfDay);
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -84,7 +76,6 @@ const Index = () => {
     }
   };
 
-  // Background decorations based on time of day
   const renderBackgroundElements = () => {
     switch (timeOfDay) {
       case 'day':
