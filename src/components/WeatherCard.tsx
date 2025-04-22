@@ -21,7 +21,6 @@ import {
   Cloud,
   Sun,
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
 
 interface WeatherCardProps {
@@ -34,7 +33,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data }) => {
   const [animateIcon, setAnimateIcon] = useState<boolean>(false);
 
   useEffect(() => {
-    // Animate weather icon on load and every minute
     setAnimateIcon(true);
     const timer = setTimeout(() => setAnimateIcon(false), 2000);
     
@@ -93,24 +91,16 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data }) => {
       <Card className="w-full bg-white/80 backdrop-blur-sm shadow-lg overflow-hidden border-2 border-white/30">
         <CardHeader className="flex flex-col items-center pb-2 relative bg-gradient-to-r from-blue-50 to-indigo-50">
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="absolute top-2 right-3 flex items-center gap-1"
-          >
-            {getWeatherIcon()}
-          </motion.div>
-          
-          <motion.div 
-            className="flex items-center gap-2 mb-1"
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.3 }}
+            className="flex items-center gap-2 mb-1"
           >
             <img
-              src={`https://flagcdn.com/w40/${data.country.toLowerCase()}.png`}
+              src={`https://flagcdn.com/w80/${data.country.toLowerCase()}.png`}
               alt={`${data.country} flag`}
-              className="h-6 rounded-sm shadow-sm"
+              className="h-8 w-12 rounded-sm shadow-sm object-cover"
+              loading="lazy"
             />
             <CardTitle className="text-xl font-bold">
               {data.name}, {data.country}

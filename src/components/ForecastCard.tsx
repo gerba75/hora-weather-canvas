@@ -48,9 +48,10 @@ const ForecastCard: React.FC<ForecastCardProps> = ({ forecast }) => {
                     
                     <div className="flex flex-col items-center gap-1">
                       <img 
-                        src={`https://openweathermap.org/img/wn/${day.weather[0].icon}.png`}
+                        src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
                         alt={translateWeatherDescription(day.weather[0].description)}
-                        className="h-10 w-10"
+                        className="h-16 w-16 object-contain"
+                        loading="lazy"
                       />
                       <span className="text-sm text-center capitalize">
                         {translateWeatherDescription(day.weather[0].description)}
